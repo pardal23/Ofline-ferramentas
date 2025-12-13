@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Cegonha IDE Offline</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f0f4f8;
+    text-align: center;
+}
+header {
+    background-color: #4caf50;
+    color: white;
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+.editor {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+}
+textarea {
+    width: 30%;
+    height: 250px;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: white;
+    resize: vertical;
+}
+button {
+    padding: 14px 25px;
+    margin: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #388e3c;
+}
+iframe {
+    width: 90%;
+    height: 500px;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    background: white;
+    margin-top: 20px;
+}
+input[type="file"] {
+    padding: 10px;
+    margin: 10px;
+}
+</style>
+</head>
+<body>
+
+<header>Cegonha IDE Offline</header>
+
+<div class="editor">
+    <textarea id="html" placeholder="HTML aqui..."><h1>Olá, Mundo!</h1></textarea>
+    <textarea id="css" placeholder="CSS aqui...">h1 { color: purple; text-align: center; }</textarea>
+    <textarea id="js" placeholder="JS aqui...">console.log("Executado!");</textarea>
+</div>
+
+<div>
+    <label for="fileUpload">📁 Upload de arquivos (HTML, CSS, JS, imagens ou vídeos):</label>
+    <input type="file" id="fileUpload" multiple>
+</div>
+
+<button onclick="executar()">▶️ Executar Código</button>
+<button onclick="limparEditor()">🧹 Limpar Editor</button>
+
+<iframe id="preview"></iframe>
+
+<script>
+// Executar código no iframe
+function executar() {
+    const html = document.getElementById("html").value;
+    const css = `<style>${document.getElementById("css").value}</style>`;
+    const js = `<script>${document.getElementById("js").value}<\/script>`;
+    const code = html + css + js;
+    const iframe = document.getElementById("preview");
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(code);
+    doc.close();
+}
+
+// Limpar editor
+function limparEditor() {
+    document.getElementById("html").value = "";
+    document.getElementById("css").value = "";
+    document.getElementById("js").value = "";
+}
+
+// Upload de arquivos para editor ou iframe
+document.getElementById("fileUpload").addEventListener("change", function(event) {
+    const files = event.target.files;
+    const iframe = document.getElementById("preview");
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const name = file.name.toLowerCase();
+
+            // HTML, CSS, JS
+            if (name.endsWith(".html") || name.endsWith(".htm")) {
+                document.getElementById("html").value = content;
+            } else if (name.endsWith(".css")) {
+                document.getElementById("css").value = content;
+            } else if (name.endsWith(".js")) {
+                document.getElementById("js").value = content;
+            }
+            // Imagem
+            else if (file.type.startsWith("image/")) {
+                const url = URL.createObjectURL(file);
+                doc.open();
+                doc.write(`<img src="${url}" style="max-width:100%; height:auto;">`);
+                doc.close();
+            }
+            // Vídeo
+            else if (file.type.startsWith("video/")) {
+                const url = URL.createObjectURL(file);
+                doc.open();
+                doc.write(`
+                    <video controls style="max-width:100%; height:auto;">
+                        <source src="${url}" type="${file.type}">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                `);
+                doc.close();
+            }
+            else {
+                alert("Formato não suportado: " + file.name);
+            }
+        };
+
+        if (file.type.startsWith("text") || name.endsWith(".html") || name.endsWith(".css") || name.endsWith(".js")) {
+            reader.readAsText(file);
+        } else {
+            reader.readAsDataURL(file);
+        }
+    }
+});
+</script>
+
+</body>
+</html>
+
+
+
