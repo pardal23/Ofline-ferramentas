@@ -1,0 +1,193 @@
+<iframe style='width:100%; max-width:700px; height:600px; border:none; margin:auto; display:block; border-radius:15px;' srcdoc=''></iframe><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Cegonha IDE Offline</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f0f4f8;
+    text-align: center;
+}
+header {
+    background-color: #4caf50;
+    color: white;
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+.editor {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+}
+textarea {
+    width: 30%;
+    height: 250px;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: white;
+    resize: vertical;
+}
+button {
+    padding: 14px 25px;
+    margin: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #388e3c;
+}
+iframe {
+    width: 90%;
+    height: 500px;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    background: white;
+    margin-top: 20px;
+}
+input[type="file"] {
+    padding: 10px;
+    margin: 10px;
+}
+#fileList {
+    margin: 20px auto;
+    padding: 10px;
+    border: 2px dashed #4caf50;
+    width: 80%;
+    min-height: 50px;
+    border-radius: 8px;
+    background: #eaf5ea;
+    text-align: left;
+}
+#fileList div {
+    margin: 5px 0;
+    padding: 5px;
+    background: #c8f0c8;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<header>Cegonha IDE Offline</header>
+
+<div class="editor">
+    <textarea id="html" placeholder="HTML aqui..."><h1>Olá, Mundo!</h1></textarea>
+    <textarea id="css" placeholder="CSS aqui...">h1 { color: purple; text-align: center; }</textarea>
+    <textarea id="js" placeholder="JS aqui...">console.log("Executado!");</textarea>
+</div>
+
+<div>
+    <label for="fileUpload">📁 Upload de arquivos (HTML, CSS, JS, imagens ou vídeos):</label>
+    <input type="file" id="fileUpload" multiple>
+</div>
+
+<!-- Div que guarda arquivos uploadados -->
+<div id="fileList">
+    <strong>Arquivos carregados:</strong>
+</div>
+
+<button onclick="executar()">▶️ Executar Código</button>
+<button onclick="limparEditor()">🧹 Limpar Editor</button>
+
+<iframe id="preview"></iframe>
+
+<script>
+const uploadedFiles = {}; // Guarda arquivos pelo nome
+
+// Executar código no iframe
+function executar() {
+    const html = document.getElementById("html").value;
+    const css = `<style>${document.getElementById("css").value}</style>`;
+    const js = `<script>${document.getElementById("js").value}<\/script>`;
+    const code = html + css + js;
+    const iframe = document.getElementById("preview");
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(code);
+    doc.close();
+}
+
+// Limpar editor
+function limparEditor() {
+    document.getElementById("html").value = "";
+    document.getElementById("css").value = "";
+    document.getElementById("js").value = "";
+}
+
+// Upload de arquivos e exibição na div
+document.getElementById("fileUpload").addEventListener("change", function(event) {
+    const files = event.target.files;
+    const fileListDiv = document.getElementById("fileList");
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        const name = file.name;
+
+        reader.onload = function(e) {
+            const content = e.target.result;
+            uploadedFiles[name] = { content, type: file.type };
+
+            // Criar elemento na div
+            const div = document.createElement("div");
+            div.textContent = name;
+            div.onclick = () => abrirNoIframe(name);
+            fileListDiv.appendChild(div);
+
+            // Preencher editor se for HTML, CSS ou JS
+            const lower = name.toLowerCase();
+            if (lower.endsWith(".html") || lower.endsWith(".htm")) document.getElementById("html").value = content;
+            else if (lower.endsWith(".css")) document.getElementById("css").value = content;
+            else if (lower.endsWith(".js")) document.getElementById("js").value = content;
+        };
+
+        if (file.type.startsWith("text") || file.name.toLowerCase().endsWith(".html") || file.name.toLowerCase().endsWith(".css") || file.name.toLowerCase().endsWith(".js")) {
+            reader.readAsText(file);
+        } else {
+            reader.readAsDataURL(file); // imagens e vídeos
+        }
+    }
+});
+
+// Abrir arquivo no iframe ao clicar na div
+function abrirNoIframe(name) {
+    const file = uploadedFiles[name];
+    if (!file) return;
+
+    const iframe = document.getElementById("preview");
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+    doc.open();
+    if (name.toLowerCase().endsWith(".html") || name.toLowerCase().endsWith(".htm")) {
+        doc.write(file.content);
+    } else if (file.type.startsWith("image/")) {
+        doc.write(`<img src="${file.content}" style="max-width:100%; height:auto;">`);
+    } else if (file.type.startsWith("video/")) {
+        doc.write(`
+            <video controls style="max-width:100%; height:auto;">
+                <source src="${file.content}" type="${file.type}">
+                Seu navegador não suporta vídeo.
+            </video>
+        `);
+    } else {
+        doc.write("<p>Arquivo não suportado para visualização.</p>");
+    }
+    doc.close();
+}
+</script>
+
+</body>
+</html>'></iframe>
