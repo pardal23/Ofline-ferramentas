@@ -1,0 +1,82 @@
+<div id="youtube-hub" class="hub">
+  <!-- Barra de busca + botão -->
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Buscar vídeo..." />
+    <button id="search-btn">Pesquisar</button>
+  </div>
+
+  <!-- Player -->
+  <div class="player-wrap">
+    <iframe id="yt-player" class="player" src="" allowfullscreen></iframe>
+  </div>
+
+  <!-- Lista dinâmica -->
+  <ul id="video-list" class="list"></ul>
+</div>
+
+<style>
+  .hub { max-width: 960px; margin: auto; padding: 12px; background: #111; color: #eee; border-radius: 8px; }
+  .player-wrap { width: 100%; aspect-ratio: 16/9; margin-bottom: 12px; }
+  .player { width: 100%; height: 100%; border: 0; }
+  .search-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+  #search { flex: 1; padding: 8px; border-radius: 6px; border: none; }
+  #search-btn { padding: 8px 14px; border: none; border-radius: 6px; background: #4fa3ff; color: #fff; cursor: pointer; }
+  #search-btn:hover { background: #3578d4; }
+  .list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+  .item { cursor: pointer; background: #222; border-radius: 6px; overflow: hidden; transition: 0.2s; }
+  .item:hover { transform: scale(1.05); }
+  .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .title { padding: 6px; font-size: 14px; }
+  .active { outline: 2px solid #4fa3ff; }
+</style>
+
+<script>
+  const videoIds = [
+    "dQw4w9WgXcQ","9bZkp7q19f0","aqz-KE-bpKQ",
+    "ZXsQAXx_ao0","3JZ_D3ELwOQ","2Vv-BfVoq4g",
+    "fJ9rUzIMcZQ","L_jWHffIx5E","YQHsXMglC9A","kJQP7kiw5Fk"
+  ];
+
+  const player = document.getElementById("yt-player");
+  const listEl = document.getElementById("video-list");
+  const searchEl = document.getElementById("search");
+  const searchBtn = document.getElementById("search-btn");
+
+  let currentIndex = -1;
+
+  function renderList(filter = "") {
+    listEl.innerHTML = "";
+    videoIds.forEach((id, idx) => {
+      const title = `Vídeo ${idx+1}`;
+      if (title.toLowerCase().includes(filter.toLowerCase())) {
+        const li = document.createElement("li");
+        li.className = "item";
+        li.dataset.index = idx;
+        li.innerHTML = `
+          <img class="thumb" src="https://img.youtube.com/vi/${id}/mqdefault.jpg" />
+          <div class="title">${title}</div>
+        `;
+        li.onclick = () => playIndex(idx);
+        listEl.appendChild(li);
+      }
+    });
+  }
+
+  function playIndex(idx) {
+    player.src = `https://www.youtube.com/embed/${videoIds[idx]}?autoplay=1&rel=0`;
+    document.querySelectorAll(".item").forEach(el => el.classList.remove("active"));
+    const active = listEl.querySelector(`[data-index="${idx}"]`);
+    if (active) active.classList.add("active");
+    currentIndex = idx;
+  }
+
+  // Botão de pesquisa
+  searchBtn.addEventListener("click", () => {
+    const term = searchEl.value;
+    renderList(term);
+  });
+
+  // Inicializa
+  renderList();
+  playIndex(0);
+</script>
