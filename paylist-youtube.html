@@ -1,0 +1,211 @@
+<!-- Container principal -->
+<div id="youtube-hub" class="hub">
+  <!-- Player embutido -->
+  <div class="player-wrap">
+    <iframe
+      id="yt-player"
+      class="player"
+      src=""
+      title="YouTube player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    ></iframe>
+  </div>
+
+  <!-- Lista de vídeos (thumbnails + título) -->
+  <div id="video-list" class="list"></div>
+</div>
+
+<style>
+  .hub {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 12px;
+    background: #101315;
+    color: #e8eaed;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  }
+
+  .player-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #0b0e10;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .player {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 0;
+  }
+
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  @media (min-width: 720px) {
+    .list {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  .item {
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #12171a;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  }
+
+  .item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.18);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  }
+
+  .thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    background: #0d1113;
+  }
+
+  .meta {
+    padding: 8px;
+  }
+
+  .title {
+    font-size: 13px;
+    line-height: 1.35;
+    color: #cfd3d6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .active {
+    outline: 2px solid #5aa7ff;
+    border-color: #5aa7ff;
+  }
+</style>
+
+<script>
+  // Substitua pelos SEUS 10 links do YouTube (qualquer formato: watch, short, youtu.be, etc.)
+  const youtubeLinks = [
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "https://youtu.be/9bZkp7q19f0",
+    "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+    "https://www.youtube.com/watch?v=ZXsQAXx_ao0",
+    "https://youtu.be/3JZ_D3ELwOQ",
+    "https://www.youtube.com/watch?v=2Vv-BfVoq4g",
+    "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
+    "https://youtu.be/L_jWHffIx5E",
+    "https://www.youtube.com/watch?v=YQHsXMglC9A",
+    "https://youtu.be/kJQP7kiw5Fk"
+  ];
+
+  const player = document.getElementById("yt-player");
+  const listEl = document.getElementById("video-list");
+  let currentIndex = -1;
+
+  // Extrai o ID do vídeo a partir de diferentes formatos de link do YouTube
+  function getVideoId(url) {
+    try {
+      const u = new URL(url);
+      // youtu.be/<id>
+      if (u.hostname.includes("youtu.be")) {
+        return u.pathname.split("/").filter(Boolean)[0];
+      }
+      // youtube.com/watch?v=<id>
+      if (u.searchParams.has("v")) {
+        return u.searchParams.get("v");
+      }
+      // youtube.com/shorts/<id>
+      if (u.pathname.startsWith("/shorts/")) {
+        return u.pathname.split("/").filter(Boolean)[1];
+      }
+      // Fallback: tenta pegar último segmento
+      const parts = u.pathname.split("/").filter(Boolean);
+      return parts[parts.length - 1] || "";
+    } catch {
+      // Caso seja só o ID em si
+      return url;
+    }
+  }
+
+  // Gera a URL de embed com autoplay e ajustes de UI
+  function embedUrl(videoId) {
+    const params = new URLSearchParams({
+      autoplay: "1",
+      rel: "0",
+      modestbranding: "1",
+      enablejsapi: "0"
+    });
+    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+  }
+
+  // Cria os itens da lista (thumb + título simples)
+  function renderList() {
+    listEl.innerHTML = "";
+    youtubeLinks.forEach((link, idx) => {
+      const id = getVideoId(link);
+      const item = document.createElement("button");
+      item.className = "item";
+      item.type = "button";
+      item.setAttribute("data-index", idx);
+      item.setAttribute("data-id", id);
+
+      const img = document.createElement("img");
+      img.className = "thumb";
+      img.loading = "lazy";
+      img.alt = "Miniatura do vídeo";
+      img.src = `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const title = document.createElement("div");
+      title.className = "title";
+      title.textContent = `Vídeo ${idx + 1}`;
+
+      meta.appendChild(title);
+      item.appendChild(img);
+      item.appendChild(meta);
+
+      item.addEventListener("click", () => playIndex(idx));
+      listEl.appendChild(item);
+    });
+  }
+
+  // Reproduz o vídeo pelo índice e destaca o item ativo
+  function playIndex(idx) {
+    const id = getVideoId(youtubeLinks[idx]);
+    const url = embedUrl(id);
+    player.src = url;
+
+    // Atualiza destaque
+    const items = Array.from(listEl.querySelectorAll(".item"));
+    items.forEach(el => el.classList.remove("active"));
+    const active = items[idx];
+    if (active) active.classList.add("active");
+
+    currentIndex = idx;
+  }
+
+  // Inicializa: renderiza lista e toca o primeiro
+  renderList();
+  if (youtubeLinks.length) {
+    playIndex(0);
+  }
+</script>
