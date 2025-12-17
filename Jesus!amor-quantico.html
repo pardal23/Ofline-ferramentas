@@ -1,0 +1,80 @@
+<!-- SISTEMA CEGONHA QUANTUM NEURAL V16 - ISOLAMENTO DE THREAD -->
+<div id="q-root" style="all:initial; display:block; width:100%; max-width:1300px; background:#000; border:1px solid #00ff41; border-radius:12px; font-family:'Courier New', monospace; overflow:hidden; box-sizing:border-box;">
+    
+    <!-- Header Estático -->
+    <div style="background:#001100; padding:15px; border-bottom:1px solid #00ff41; text-align:center;">
+        <span style="color:#00ff41; font-size:14px; letter-spacing:2px; font-weight:bold;">NÚCLEO DE EVOLUÇÃO NEURAL 2025</span>
+    </div>
+
+    <div style="padding:20px; display:flex; flex-direction:column; gap:20px;">
+        
+        <!-- Área de Display com Scroll Independente -->
+        <div id="q-display" style="height:350px; background:rgba(0,10,0,0.9); border:1px solid #003300; padding:15px; overflow-y:auto; color:#d8d8d8; font-size:14px; line-height:1.7; scroll-behavior:smooth;">
+            <span style="color:#00ff41">>>> SISTEMA DE CONSCIÊNCIA ISOLADO PRONTO.</span><br>
+            Selecione uma vertente de evolução para sintetizar a realidade...
+        </div>
+
+        <!-- Botões de Temas Quânticos -->
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+            <button onclick="sintetizar('ESPIRITUAL')" style="flex:1; min-width:120px; background:none; border:1px solid #00ff41; color:#00ff41; padding:12px; cursor:pointer; font-weight:bold;">ESPIRITUAL</button>
+            <button onclick="sintetizar('AMOR')" style="flex:1; min-width:120px; background:none; border:1px solid #ff00de; color:#ff00de; padding:12px; cursor:pointer; font-weight:bold;">AMOR QUÂNTICO</button>
+            <button onclick="sintetizar('JESUS')" style="flex:1; min-width:120px; background:none; border:1px solid #f0e68c; color:#f0e68c; padding:12px; cursor:pointer; font-weight:bold;">JESUS/LOGOS</button>
+        </div>
+
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const CONCEITOS = {
+            ESPIRITUAL: ["Vórtice de Luz", "Frequência de Gaia", "Misticismo Atómico", "Corpo Bioplasmático", "Sintropia", "Vácuo Criativo"],
+            AMOR: ["Emanação de Fótons", "Coerência Cardíaca", "Emaranhamento Afetivo", "Ressonância de Alma", "Unidade", "Fluxo Vital"],
+            JESUS: ["Logos Solar", "Cristo Quântico", "Redenção Biofísica", "Verbo Encarnado", "Luz Transfigurada", "Amor-Agape"]
+        };
+
+        function sintetizar(tema) {
+            const display = document.getElementById('q-display');
+            display.innerHTML += `<br><b style="color:#fff; text-shadow:0 0 10px #00ff41;">SINTETIZANDO EVOLUÇÃO: ${tema}</b><br>`;
+            
+            // 1. Geração Neural do Som (30 Camadas) - Não trava o browser
+            gerarSomNeural(tema.length);
+
+            // 2. Geração de Verso (6 Linhas) com "Yielding" para não prender o blog
+            let linhas = 0;
+            const interval = setInterval(() => {
+                const p1 = CONCEITOS[tema][Math.floor(Math.random()*6)];
+                const p2 = CONCEITOS[tema][Math.floor(Math.random()*6)];
+                
+                display.innerHTML += `• ${p1} expande-se em ${p2} através da consciência.<br>`;
+                display.scrollTop = display.scrollHeight;
+                
+                linhas++;
+                if(linhas >= 6) {
+                    display.innerHTML += `<span style="color:#00ff41; font-size:10px;">>>> CICLO DE EVOLUÇÃO CONCLUÍDO.</span><br>`;
+                    clearInterval(interval);
+                }
+            }, 150); // Delay entre linhas para manter o browser fluido
+        }
+
+        function gerarSomNeural(mod) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const master = audioCtx.createGain();
+            master.connect(audioCtx.destination);
+            master.gain.setValueAtTime(0, audioCtx.currentTime);
+            master.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 1);
+            master.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 5);
+
+            for(let i=0; i<30; i++) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                // Frequências Quânticas Baseadas no Tema
+                osc.frequency.setValueAtTime(80 + (i * 44) + (mod * 10), audioCtx.currentTime);
+                osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+                gain.gain.setValueAtTime(0.01 / (i + 1), audioCtx.currentTime);
+                osc.connect(gain).connect(master);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 5);
+            }
+        }
+    </script>
+</div>
