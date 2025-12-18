@@ -1,0 +1,99 @@
+<!-- POEMAS DE RUA - IA EVOLUTIVA 2025 -->
+<div id="rua-container" style="all: initial; display: block; width: 100%; height: 550px; background: #000; border: 3px solid #ff00ff; border-radius: 12px; overflow: hidden; position: relative; font-family: 'Courier New', monospace; box-sizing: border-box;">
+
+    <!-- Fundo de Partículas Coloridas (Grafite Digital) -->
+    <canvas id="rua-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.4;"></canvas>
+
+    <div id="rua-ui" style="position: relative; z-index: 2; padding: 20px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+        
+        <h2 style="color: #fff; text-align: center; text-transform: uppercase; margin: 0; letter-spacing: 5px; text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;">
+            Poemas de Rua
+        </h2>
+
+        <!-- Área do Poema com Scroll Invisível -->
+        <div id="rua-display" style="flex: 1; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.7); border-left: 4px solid #ffff00; overflow-y: auto; font-size: 16px; line-height: 1.6; color: #00ffcc;">
+            <p style="color: #ff00ff;">>>> Toque no asfalto digital para ler a cidade...</p>
+        </div>
+
+        <!-- Interface de Entrada -->
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="rua-input" placeholder="Tema da rua (ex: chuva, neon, noite)..." style="flex: 1; background: #111; border: 1px solid #00ffff; color: #fff; padding: 12px; outline: none;">
+            <button onclick="gerarPoemaRua()" style="background: #ffff00; color: #000; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; text-transform: uppercase;">Criar</button>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const canvas = document.getElementById('rua-canvas');
+        const ctx = canvas.getContext('2d');
+        let pts = [];
+
+        // Redimensionar sem travar
+        function res() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', res);
+        res();
+
+        // Partículas de cores vibrantes
+        for(let i=0; i<40; i++) {
+            pts.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vX: (Math.random() - 0.5) * 2,
+                vY: (Math.random() - 0.5) * 2,
+                c: `hsl(${Math.random() * 360}, 100%, 50%)`
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            pts.forEach(p => {
+                p.x += p.vX; p.y += p.vY;
+                if(p.x < 0 || p.x > canvas.width) p.vX *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vY *= -1;
+                ctx.fillStyle = p.c;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = p.c;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+
+    function gerarPoemaRua() {
+        const input = document.getElementById('rua-input').value;
+        const display = document.getElementById('rua-display');
+        
+        const base = {
+            versos: [
+                "O asfalto grita cores que ninguém vê,",
+                "No reflexo da poça, a alma se crê,",
+                "Muros pintados com sangue e neon,",
+                "A batida do concreto é o nosso som,",
+                "Passos perdidos na geometria do caos,",
+                "Entre anjos de lata e demónios de cristal."
+            ],
+            cores: ["#ff00ff", "#00ffff", "#ffff00", "#ff3300", "#00ff00"]
+        };
+
+        let poemaHtml = `<div style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">`;
+        poemaHtml += `<b style="color: #fff;">SÍNTESE URBANA: ${input.toUpperCase()}</b><br><br>`;
+        
+        // Algoritmo de cores aleatórias por linha
+        for(let i=0; i<6; i++) {
+            let cor = base.cores[Math.floor(Math.random() * base.cores.length)];
+            let verso = base.versos[Math.floor(Math.random() * base.versos.length)];
+            poemaHtml += `<span style="color: ${cor};">${verso}</span><br>`;
+        }
+        poemaHtml += `</div>`;
+
+        display.innerHTML = poemaHtml + display.innerHTML;
+        display.scrollTop = 0;
+    }
+    </script>
+</div>
