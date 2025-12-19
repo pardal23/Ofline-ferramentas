@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <title>System_Search_v2026</title>
+    <style>
+        body { background: #000; color: #333; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        #view { height: 90vh; overflow-y: auto; padding: 20px; scroll-behavior: smooth; border-bottom: 1px solid #111; }
+        #view::-webkit-scrollbar { width: 0px; }
+        .row { margin-bottom: 10px; font-size: 13px; font-family: monospace; }
+        .input-box { display: flex; align-items: center; padding: 10px 20px; background: #050505; }
+        input { background: transparent; border: none; color: #555; font-size: 14px; outline: none; width: 100%; }
+        input:focus { color: #0f0; }
+        
+        /* OVERLAY DE FORÇA */
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .search-bar { width: 350px; border: 1px solid #1a1a1a; display: flex; align-items: center; padding: 5px 15px; border-radius: 20px; background: #050505; }
+        .btn-force { background: transparent; border: none; color: #1a1a1a; cursor: pointer; font-size: 18px; margin-left: 10px; transition: 0.3s; }
+        .btn-force:hover { color: #0f0; }
+        
+        .eu { color: #0f0; }
+        .pa { color: #0088ff; }
+    </style>
+</head>
+<body>
+
+<!-- ACESSO COM BOTÃO DE FORÇA (ENTER OU CLICK) -->
+<div id="overlay">
+    <div class="search-bar">
+        <input type="password" id="sk" placeholder="Pesquisar..." style="color: #222;">
+        <button class="btn-force" onclick="validarForca()" id="fb">🔍</button>
+    </div>
+    <p style="color: #111; font-size: 10px; margin-top: 10px;">Versão 2026.12.19 - Engine Ativa</p>
+</div>
+
+<div id="view"></div>
+
+<div class="input-box">
+    <span style="color:#222; margin-right:15px;">🔍</span>
+    <input type="text" id="in" placeholder="Pesquisar na rede..." autocomplete="off">
+</div>
+
+<script>
+    let k = "";
+    let lastTS = 0;
+    const bridge = "api.keyvalue.xyz";
+
+    // FUNÇÃO DE FORÇA (BOTÃO OU ENTER)
+    function validarForca() {
+        const val = document.getElementById('sk').value;
+        if(val.includes("cegonha:")) {
+            k = btoa(val.split(":")[1]); // Extrai o ID da sala após a senha
+            document.getElementById('overlay').style.display = "none";
+            document.getElementById('in').focus();
+            
+            // Log de Sistema 2025/2026
+            log("SISTEMA", "Ligação sincronizada. Protocolo invisível.", "eu");
+            setInterval(sync, 1500);
+        } else {
+            document.getElementById('sk').value = "";
+        }
+    }
+
+    // Atalho Enter no Overlay
+    document.getElementById('sk').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') validarForca();
+    });
+
+    // ENVIO AGRESSIVO
+    async function send(m) {
+        const payload = { u: "X", m: m, t: Date.now() };
+        try {
+            await fetch(bridge + k, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                mode: 'no-cors',
+                keepalive: true
+            });
+            log("SISTEMA", m, "eu");
+            lastTS = payload.t;
+        } catch(e) {}
+    }
+
+    // SINCRONIZAÇÃO
+    async function sync() {
+        if(!k) return;
+        try {
+            const r = await fetch(`${bridge}${k}?cache=${Date.now()}`);
+            const d = await r.json();
+            if(d.t && d.t > lastTS) {
+                lastTS = d.t;
+                log("DATABASE", d.m, "pa");
+                beep();
+            }
+        } catch(e) {}
+    }
+
+    function log(u, m, cls) {
+        const v = document.getElementById('view');
+        const l = document.createElement('div');
+        l.className = "row";
+        l.innerHTML = `[${new Date().toLocaleTimeString()}] <span class="${cls}">${u}</span> >> ${m}`;
+        v.appendChild(l);
+        v.scrollTop = v.scrollHeight;
+    }
+
+    document.getElementById('in').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter' && e.target.value) {
+            send(e.target.value);
+            e.target.value = "";
+        }
+    });
+
+    function beep() {
+        try {
+            const ac = new (window.AudioContext || window.webkitAudioContext)();
+            const o = ac.createOscillator();
+            const g = ac.createGain();
+            o.connect(g); g.connect(ac.destination);
+            o.frequency.value = 400; g.gain.value = 0.005;
+            o.start(); o.stop(ac.currentTime + 0.03);
+        } catch(e) {}
+    }
+</script>
+</body>
+</html>
